@@ -197,18 +197,29 @@ static std::chrono::steady_clock::time_point StartTime() {
     return start;
 }
 
+// For test runs only: TPW_SPEED=N (1 to 1000) makes the clock the game reads run N times as fast, so a park lives through
+// hours in minutes. Unset, time is real.
+static int64_t Speed() {
+    static const int64_t speed = [] {
+        const char* text = std::getenv("TPW_SPEED");
+        const long value = text != nullptr ? std::strtol(text, nullptr, 10) : 1;
+        return static_cast<int64_t>(value < 1 ? 1 : value > 1000 ? 1000 : value);
+    }();
+    return speed;
+}
+
 // Microseconds since the program started (the Mac's since boot; the game uses differences,
 // and one value to seed rand).
 uint64_t UTimer::GetAbsolute() {
     const auto start = StartTime();   // first: the first call must not read the clock before the start is taken
-    const auto elapsed = std::chrono::steady_clock::now() - start;
+    const auto elapsed = (std::chrono::steady_clock::now() - start) * Speed();
     return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count());
 }
 
 // A free-running counter (the PowerPC time base); nanoseconds here.
 uint64_t UTimer::GetAbsoluteCycles() {
     const auto start = StartTime();
-    const auto elapsed = std::chrono::steady_clock::now() - start;
+    const auto elapsed = (std::chrono::steady_clock::now() - start) * Speed();
     return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count());
 }
 
