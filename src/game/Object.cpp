@@ -1,6 +1,7 @@
 // Object.cpp: name proven by __sinit_Object_cpp in the main application.
 
 #include "ActionRecorder.h"
+#include "platform/asm_name.h"
 #include "AdvisorQueue.h"
 #include "analyser.h"
 #include "CMessageCentre.h"
@@ -49,8 +50,8 @@
 // and posts the matching message.
 
 // The two CPerson members SetState calls; CPerson is a placeholder class here (ThingReceivers.h), so they are declared against their Mac names.
-void ObjectForceRideAdmittance(CPerson*) __asm__("__ZN7CPerson19ForceRideAdmittanceEv");   // 0x1011df70
-void ObjectDismissFromQueue(CPerson*) __asm__("__ZN7CPerson16DismissFromQueueEv");         // 0x1011f1b8
+void ObjectForceRideAdmittance(CPerson*) __asm__(TPW_ASM_NAME("_ZN7CPerson19ForceRideAdmittanceEv"));   // 0x1011df70
+void ObjectDismissFromQueue(CPerson*) __asm__(TPW_ASM_NAME("_ZN7CPerson16DismissFromQueueEv"));         // 0x1011f1b8
 
 namespace {
 constexpr const char* kRowZero = "Thing has been allocated in ThingArray index 0 - shouldn't happen\n";
@@ -793,9 +794,9 @@ int32_t CObject::IsAvailableToChoose() {
 // and src/Object_opening.cpp hold other CObject members. The guests are CPerson, a placeholder class: the ride reads one word of a guest (+0x220, his
 // state) and calls five of his members, which stay untranslated (the launcher answers zero).
 
-int32_t ObjectReadyForAdmitting(CPerson*) __asm__("__ZNK7CPerson17ReadyForAdmittingEv");   // 0x1011f0b8
-void ObjectOnAdmittance(CPerson*) __asm__("__ZN7CPerson12OnAdmittanceEv");                 // 0x1011f114
-int32_t ObjectExitRide(CPerson*) __asm__("__ZN7CPerson8ExitRideEv");                       // 0x1011f5a4
+int32_t ObjectReadyForAdmitting(CPerson*) __asm__(TPW_ASM_NAME("_ZNK7CPerson17ReadyForAdmittingEv"));   // 0x1011f0b8
+void ObjectOnAdmittance(CPerson*) __asm__(TPW_ASM_NAME("_ZN7CPerson12OnAdmittanceEv"));                 // 0x1011f114
+int32_t ObjectExitRide(CPerson*) __asm__(TPW_ASM_NAME("_ZN7CPerson8ExitRideEv"));                       // 0x1011f5a4
 
 // 0x1034c35c: the float GetIdealQueueLength and QueueTooLong store the ratio of the ride's speed to its record's initial speed in (the name is mine).
 float gObjectQueueSpeedRatio = 0.0f;
@@ -920,7 +921,7 @@ bool CObject::QueueTooLong() const {
 // link halfwords of a person (+0x228 the person behind, +0x22a the person ahead) are read through file-local accessors, as src/Object_turn.cpp does.
 
 // CPerson::EvaluateQueueEdit (0x1011f2f8, untranslated), by its Mac name as src/Object_turn.cpp does for its CPerson members.
-void ObjectEvaluateQueueEdit(CPerson*) __asm__("__ZN7CPerson17EvaluateQueueEditEv");
+void ObjectEvaluateQueueEdit(CPerson*) __asm__(TPW_ASM_NAME("_ZN7CPerson17EvaluateQueueEditEv"));
 
 namespace {
 using MapTag = tag_IDX_TYPE<IDXTYPEUniqueNameMapId, uint16_t>;

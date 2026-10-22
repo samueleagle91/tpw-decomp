@@ -141,7 +141,11 @@ UMemoryAlignedBase::UMemoryAlignedBase(uint32_t count, uint32_t alignment, uint3
     if (alignment < sizeof(void*)) alignment = sizeof(void*);
     const size_t size = static_cast<size_t>(count) * elementSize;
     void* block = nullptr;
+#ifdef _WIN32
+    block = _aligned_malloc(size != 0 ? size : 1, alignment);   // freed with _aligned_free (the destructor)
+#else
     if (posix_memalign(&block, alignment, size != 0 ? size : 1) != 0) block = nullptr;
+#endif
     if (block != nullptr) std::memset(block, 0, size);
     mF00 = count;
     mData = block;
@@ -150,7 +154,11 @@ UMemoryAlignedBase::UMemoryAlignedBase(uint32_t count, uint32_t alignment, uint3
 }
 
 UMemoryAlignedBase::~UMemoryAlignedBase() {
+#ifdef _WIN32
+    _aligned_free(mData);
+#else
     std::free(mData);
+#endif
     mData = nullptr;
 }
 

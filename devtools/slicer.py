@@ -201,6 +201,11 @@ def load_libclang(compiler):
     return cl, res
 
 
+def macho_name(name):
+    """A symbol as Mach-O spells it (one leading underscore more than ELF and 64-bit COFF)."""
+    return name if sys.platform == "darwin" or not name else "_" + name
+
+
 class Parser:
     def __init__(self, compiler):
         self.cl, self.resource_dir = load_libclang(compiler)
@@ -219,6 +224,11 @@ class Parser:
         s = self.cl.clang_getCString(cxstring)
         self.cl.clang_disposeString(cxstring)
         return s.decode() if s else ""
+
+    def mangling(self, cursor):
+        """The cursor's symbol as Mach-O spells it, the spelling of every keep and drop list: other hosts' names lack
+        its leading underscore."""
+        return macho_name(self.text(self.cl.clang_Cursor_getMangling(cursor)))
 
     def children(self, cursor):
         out = []
@@ -400,7 +410,7 @@ def index_file(parser, src, flags):
             continue                    # a member of a class template (or of a class inside one): emitted only where used
         if c.kind in FUNCTION_KINDS and cl.clang_Cursor_isFunctionInlined(c):
             continue
-        name = parser.text(cl.clang_Cursor_getMangling(c))
+        name = parser.mangling(c)
         spelled = parser.text(cl.clang_getCursorSpelling(c))
         (b, bl), (e, el), (sb, _), (se, _) = parser.extent(c)
         where = f"{name} ({spelled}, {describe(text, b)})"
@@ -414,7 +424,7 @@ def index_file(parser, src, flags):
             variants = []
             if c.kind in (K_CTOR, K_DTOR):
                 ss = cl.clang_Cursor_getCXXManglings(c)
-                variants = [cl.clang_getCString(ss.contents.Strings[i]).decode() for i in range(ss.contents.Count)]
+                variants = [macho_name(cl.clang_getCString(ss.contents.Strings[i]).decode()) for i in range(ss.contents.Count)]
                 cl.clang_disposeStringSet(ss)
             specialization = not cl.clang_Cursor_isNull(cl.clang_getSpecializedCursorTemplate(c))
             member = parent.kind in RECORD_KINDS
@@ -639,7 +649,7 @@ def static_objects(parser, cl, tu, main, text, problems):
     walk(cl.clang_getTranslationUnitCursor(tu))
     items, decls = [], {}
     for c in found:
-        name = parser.text(cl.clang_Cursor_getMangling(c))
+        name = parser.mangling(c)
         spelled = parser.text(cl.clang_getCursorSpelling(c))
         (b, bl), (e, _), (sb, _), (se, _) = parser.extent(c)
         try:
@@ -825,7 +835,7 @@ def explicit_instantiations(parser, cl, src, flags, text, tu, main, problems):
             continue
         c = decls[pname]
         if kind == "class":
-            mangled = parser.text(cl.clang_Cursor_getMangling(c))
+            mangled = parser.mangling(c)
             head = f"__Z{len('__slicer_probe_' + pname)}__slicer_probe_{pname}P"
             if mangled.startswith(head):
                 names.setdefault((n, k), set()).add(("__ZTS" + mangled[len(head):], ()))
@@ -836,9 +846,9 @@ def explicit_instantiations(parser, cl, src, flags, text, tu, main, problems):
         variants = ()
         if r.kind in (K_CTOR, K_DTOR):
             ss = cl.clang_Cursor_getCXXManglings(r)
-            variants = tuple(cl.clang_getCString(ss.contents.Strings[i]).decode() for i in range(ss.contents.Count))
+            variants = tuple(macho_name(cl.clang_getCString(ss.contents.Strings[i]).decode()) for i in range(ss.contents.Count))
             cl.clang_disposeStringSet(ss)
-        names.setdefault((n, k), set()).add((parser.text(cl.clang_Cursor_getMangling(r)), variants))
+        names.setdefault((n, k), set()).add((parser.mangling(r), variants))
     cl.clang_disposeTranslationUnit(ptu)
 
     items = []

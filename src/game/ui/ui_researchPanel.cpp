@@ -1,6 +1,7 @@
 // ui_researchPanel.cpp: guessed name (the binary has no __sinit for this file): a contiguous range of free functions, named after what they do.
 
 #include "AdvisorScoring.h"
+#include "platform/asm_name.h"
 #include "analyser.h"
 #include "Debug.h"
 #include "email.h"
@@ -174,9 +175,9 @@ void NameWindow(int32_t group) {
 // UIMain_UISound is 14 characters long. The test library defines TPW_DOSCROLL_FAKES (its cmake file): its recording fake in
 // tests/unit_DoScroll.cpp carries the symbol under the length prefix 13.
 #ifdef TPW_DOSCROLL_FAKES
-int32_t UIMain_UISoundHandle(int32_t code) __asm__("__Z13UIMain_UISoundi");
+int32_t UIMain_UISoundHandle(int32_t code) __asm__(TPW_ASM_NAME("_Z13UIMain_UISoundi"));
 #else
-int32_t UIMain_UISoundHandle(int32_t code) __asm__("__Z14UIMain_UISoundi");
+int32_t UIMain_UISoundHandle(int32_t code) __asm__(TPW_ASM_NAME("_Z14UIMain_UISoundi"));
 #endif
 
 int32_t gResearchScrollSound;   // 0x10395960 (name invented)
@@ -431,7 +432,7 @@ uint32_t gResearchFontIndex = 6;
 int16_t gResearchPanelScript[] = {TPW_WINDOW_SCRIPT_102AC35A};   // 0x102ac35a: the image's words (generated, devtools/gen_game_tables.py)
 
 // UIMain_UISound is declared void, but this function stores what the call leaves in r3 (the sound's handle): the same symbol, read as an int.
-int32_t UIMain_UISoundHandle_2(int32_t code) __asm__("__Z14UIMain_UISoundi");
+int32_t UIMain_UISoundHandle_2(int32_t code) __asm__(TPW_ASM_NAME("_Z14UIMain_UISoundi"));
 
 namespace {
 

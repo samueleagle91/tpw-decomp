@@ -21,7 +21,7 @@ public:
     // Unit v51118: 0x10168c04 (64): 0 without a font, else the font's virtual at +0x28 (the vertical spacing, a byte).
     int32_t GetHeight();
 };
-#ifndef TPW_V51039_STRONG
+#if !defined(TPW_V51039_STRONG) && !defined(_WIN32)   // no test library on Windows, and COFF refuses the copy beside the real one
 __attribute__((weak)) inline int32_t InterfaceFontWrapper::GetCharWidth(char16_t) { return 0; }
 #endif
 struct TbFontCharSize;

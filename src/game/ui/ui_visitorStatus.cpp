@@ -1,6 +1,7 @@
 // ui_visitorStatus.cpp: name proven by __sinit_ui_visitorStatus_cpp in the main application.
 
 #include "ActionRecorder.h"
+#include "platform/asm_name.h"
 #include "Advisor.h"
 #include "bfl_FileSystem.h"
 #include "Clock.h"
@@ -152,7 +153,7 @@ void VisitorStatusPanel::UpdateViewWindow() {
 }
 
 // The real constructors by their symbols, weak so that the test library (which fakes both callees and does not link them) builds.
-extern "C" void VspGradientCtorSym(void*, void*) __asm__("__ZN28InterfaceDrawEngineHGradientC1EPv") __attribute__((weak));
+extern "C" void VspGradientCtorSym(void*, void*) __asm__(TPW_ASM_NAME("_ZN28InterfaceDrawEngineHGradientC1EPv")) __attribute__((weak));
 
 namespace vsp_callee {
 __attribute__((weak)) void GradientCtor(void* mem, void* data) { VspGradientCtorSym(mem, data); }

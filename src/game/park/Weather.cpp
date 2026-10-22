@@ -1,6 +1,7 @@
 // Weather.cpp: guessed name (the binary has no __sinit for this file): a contiguous range of Weather code, named after it.
 
 #include "AdvisorQueue.h"
+#include "platform/asm_name.h"
 #include "analyser.h"
 #include "Clock.h"
 #include "CMessageCentre.h"
@@ -350,8 +351,8 @@ void CWeather::FindLightningCoords(D3DVECTOR& start, D3DVECTOR& end, int32_t str
 // death-message support, random/season providers and tree insertion remain callees.
 
 // Source-local Darwin ABI declarations, keeping w123b's World/ParkTime headers intact.
-uint32_t ThingLoopWorldRand(CWorld*) __asm__("__ZN6CWorld7GetRandEv");   // 0x1013b1e4
-int32_t ThingLoopSeason(const CParkTime*) __asm__("__ZNK9CParkTime9GetSeasonEv");   // 0x101129e8
+uint32_t ThingLoopWorldRand(CWorld*) __asm__(TPW_ASM_NAME("_ZN6CWorld7GetRandEv"));   // 0x1013b1e4
+int32_t ThingLoopSeason(const CParkTime*) __asm__(TPW_ASM_NAME("_ZNK9CParkTime9GetSeasonEv"));   // 0x101129e8
 
 namespace {
 uint32_t SeasonValue(int32_t season, int32_t slot) {

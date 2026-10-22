@@ -75,7 +75,12 @@ target_link_libraries(tpw PUBLIC ZLIB::ZLIB)
 # Copies of src files with only some of their definitions, for the test libraries (cmake/slicer.cmake).
 include(cmake/slicer.cmake)
 # The platform layer's sound module (platform/sound_module.cpp) defines these CSprocketsModule methods for the launcher,
-# so the game library builds src/sound/CSprocketsModule.cpp without them.
+# so the game library builds src/sound/CSprocketsModule.cpp without them. On Windows its destructor goes too: it is the
+# vtable's key function, and COFF cannot make the vtable it emits weak (src/sound/CSprocketsModule.cpp).
+set(TPW_SPROCKETS_DROP_DTOR)
+if(WIN32)
+  set(TPW_SPROCKETS_DROP_DTOR __ZN16CSprocketsModuleD1Ev)   # CSprocketsModule::~CSprocketsModule()
+endif()
 tpw_slice(TARGET tpw NAME tpw SOURCES sound/CSprocketsModule.cpp DROP
   __ZN16CSprocketsModule11GetPositionEjR15TbSoundPosition   # CSprocketsModule::GetPosition(unsigned int, TbSoundPosition&)
   __ZN16CSprocketsModule11StopChannelEj   # CSprocketsModule::StopChannel(unsigned int)
@@ -84,7 +89,8 @@ tpw_slice(TARGET tpw NAME tpw SOURCES sound/CSprocketsModule.cpp DROP
   __ZN16CSprocketsModule16SetSpeakerConfigERKN9TbSpeaker6ConfigE   # CSprocketsModule::SetSpeakerConfig(TbSpeaker::Config const&)
   __ZN16CSprocketsModule19SetListenerPositionERK15TbSoundPosition   # CSprocketsModule::SetListenerPosition(TbSoundPosition const&)
   __ZN16CSprocketsModule7StopAllEv   # CSprocketsModule::StopAll()
-  __ZN16CSprocketsModule8PauseAllEv)   # CSprocketsModule::PauseAll()
+  __ZN16CSprocketsModule8PauseAllEv   # CSprocketsModule::PauseAll()
+  ${TPW_SPROCKETS_DROP_DTOR})
 
 # The launcher's asset library (assets/): the compiled-in manifest of the files a game folder must hold, found by content
 # (devtools/make_manifest.py writes assets/manifest_data.inc by hand; no Python runs at build time).

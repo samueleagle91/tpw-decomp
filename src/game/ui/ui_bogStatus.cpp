@@ -2,6 +2,7 @@
 
 #define TPW_UIMENU_CTOR_EXTERNAL
 #include "CellBase.h"
+#include "platform/asm_name.h"
 #include "FillLenderList.h"
 #include "FS_Online.h"
 #include "FS_OnlineList.h"
@@ -99,7 +100,7 @@ int32_t FloatToCell(double value);
 namespace bog_callee {
 // 0x101898c8 InterfaceDrawEngineHGradient(mesh), the complete object constructor, named by its symbol so that the test library (which
 // replaces HGradientCtor below with a recording fake) links without it.
-extern "C++" void HGradientRaw(void* memory, void* mesh) __asm__("__ZN28InterfaceDrawEngineHGradientC1EPv");
+extern "C++" void HGradientRaw(void* memory, void* mesh) __asm__(TPW_ASM_NAME("_ZN28InterfaceDrawEngineHGradientC1EPv"));
 
 // The constructor built in the memory given (weak: the test library defines its own, recording one).
 __attribute__((weak)) void HGradientCtor(void* memory, const char* mesh) { HGradientRaw(memory, const_cast<char*>(mesh)); }

@@ -469,12 +469,9 @@ int32_t TrueTypeRender::load_settings(bfl::FileSystem::CFile* file) {
     TPFile_Read(&mTextY, 4, 1, file);
     SamsUtilities::_USwapBlock32(reinterpret_cast<uint32_t*>(&mTextY), 1);
     TPFile_Read(&mLogFont, 0x3c, 1, file);
-    // Only the five int32 words are swapped (the inline byte swaps); the flag bytes and the face name stay as read.
-    uint32_t* words = reinterpret_cast<uint32_t*>(&mLogFont);
-    for (int32_t i = 0; i < 5; ++i) {
-        const uint32_t v = words[i];
-        words[i] = (v >> 24) | ((v >> 8) & 0xff00) | ((v << 8) & 0xff0000) | (v << 24);
-    }
+    // Only the five int32 words are swapped (the Mac's inline byte swaps); the flag bytes and the face name stay as read.
+    // The file is little-endian like the rest of these settings, so a little-endian host leaves them as they are.
+    SamsUtilities::_USwapBlock32(reinterpret_cast<uint32_t*>(&mLogFont), 5);
     return 1;
 }
 

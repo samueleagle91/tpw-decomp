@@ -1,6 +1,7 @@
 // ui_cityLobbyController.cpp: name proven by __sinit_ui_cityLobbyController_cpp in the main application.
 
 #include "AdvisorScoring.h"
+#include "platform/asm_name.h"
 #include "email.h"
 #include "FillLenderList.h"
 #include "FS_MasterSave.h"
@@ -184,8 +185,8 @@ void UpdateCityLobbyUI(CLBIsland* island) {
 
 // The launcher's definitions of the two glue names; the unit test library overrides them with recording fakes. The real string
 // members are reached through their symbols (weak, so the test library links without the string sources).
-extern "C" __attribute__((weak)) void RealCityLobbyStringCtor(void* self, const char16_t* text) __asm__("__ZN23TbDynamicStringTemplateIDsEC1EPKDs");
-extern "C" __attribute__((weak)) void RealCityLobbyStringDtor(void* self) __asm__("__ZN23TbDynamicStringTemplateIDsED1Ev");
+extern "C" __attribute__((weak)) void RealCityLobbyStringCtor(void* self, const char16_t* text) __asm__(TPW_ASM_NAME("_ZN23TbDynamicStringTemplateIDsEC1EPKDs"));
+extern "C" __attribute__((weak)) void RealCityLobbyStringDtor(void* self) __asm__(TPW_ASM_NAME("_ZN23TbDynamicStringTemplateIDsED1Ev"));
 extern "C" __attribute__((weak)) void* CityLobbyStringConstruct(void* self, const char16_t* text) {
     RealCityLobbyStringCtor(self, text);
     return self;

@@ -11,7 +11,11 @@
 // without the rest of the platform layer.
 #include "platform/arena.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <sys/mman.h>
+#endif
 
 #include <cstdio>
 #include <cstdlib>
@@ -58,10 +62,21 @@ std::vector<LargeHole>* gHoles = nullptr;
     std::abort();
 }
 
+#ifdef _WIN32
+// Windows does not commit reserved pages when they are touched: Carve commits the range up to the new top, in steps.
+constexpr size_t kCommitStep = size_t(4) << 20;
+size_t gCommitted = 0;
+#endif
+
 void Reserve() {
     if (gArenaBase != nullptr) return;
+#ifdef _WIN32
+    void* base = VirtualAlloc(nullptr, kArenaBytes, MEM_RESERVE, PAGE_READWRITE);
+    if (base == nullptr) Fail("could not reserve the address range", nullptr);
+#else
     void* base = mmap(nullptr, kArenaBytes, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON | MAP_NORESERVE, -1, 0);
     if (base == MAP_FAILED) Fail("could not reserve the address range", nullptr);
+#endif
     gArenaBase = static_cast<uint8_t*>(base);
     gTop = 4096;   // offset 0 is the null pointer; the first page stays unused
     gHoles = new std::vector<LargeHole>;
@@ -85,6 +100,14 @@ int ClassOf(size_t size, size_t& capacity) {
 
 void* Carve(size_t bytes) {
     if (bytes > kArenaBytes - gTop) return nullptr;
+#ifdef _WIN32
+    if (gTop + bytes > gCommitted) {
+        size_t end = (gTop + bytes + kCommitStep - 1) / kCommitStep * kCommitStep;
+        if (end > kArenaBytes) end = kArenaBytes;
+        if (VirtualAlloc(gArenaBase + gCommitted, end - gCommitted, MEM_COMMIT, PAGE_READWRITE) == nullptr) return nullptr;
+        gCommitted = end;
+    }
+#endif
     void* block = gArenaBase + gTop;
     gTop += bytes;
     return block;

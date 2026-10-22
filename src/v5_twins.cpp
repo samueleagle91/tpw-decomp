@@ -67,7 +67,12 @@ template class TbTList<TFSLoadSaveSaveFileDetails*, TFSLoadSaveSaveFileDetails*>
 template class TbTList<TbDynamicStringTemplate<char16_t>*, TbDynamicStringTemplate<char16_t>*>;
 // main: ~TbTList 0x1014aa0c, Find 0x1014aad4, RemoveAll 0x1014ab7c, RemoveHead 0x1014ac48, AddTail 0x1014af08, AddHead 0x1014b010
 template class TbTList<TbDynamicStringTemplate<char>*, TbDynamicStringTemplate<char>*>;
-// bullfrog: TbTList 0x100148b8
+// bullfrog: TbTList 0x100148b8. The destructor, RemoveAll and RemoveHead are src/bullfrog/LbSCBack.cpp's explicit
+// specializations, declared before the instantiation so that it leaves them to that file (a Mac link took the
+// specializations over the instantiation's weak copies; Windows' linker refuses the pair).
+template <> TbTList<_LbSEFunction*, _LbSEFunction*>::~TbTList();
+template <> void TbTList<_LbSEFunction*, _LbSEFunction*>::RemoveAll();
+template <> _LbSEFunction* TbTList<_LbSEFunction*, _LbSEFunction*>::RemoveHead();
 template class TbTList<_LbSEFunction*, _LbSEFunction*>;
 // main: TbTList 0x10141d94
 template TbTList<tag_IDX_TYPE<IDXTYPEUniqueNameThingId, unsigned short>, tag_IDX_TYPE<IDXTYPEUniqueNameThingId, unsigned short>>::TbTList();

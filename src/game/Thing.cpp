@@ -1,6 +1,7 @@
 // Thing.cpp: name proven by __sinit_Thing_cpp in the main application.
 
 #include "AdvisorQueue.h"
+#include "platform/asm_name.h"
 #include "analyser.h"
 #include "CMessageCentre.h"
 #include "CMsgDeath.h"
@@ -68,7 +69,7 @@ int32_t CTagSystem::Serialise(void* file, int32_t save, int32_t version, uint32_
 // death-message support, random/season providers and tree insertion remain callees.
 
 void ThingLoopWorldPending(CWorld*, tag_IDX_TYPE<IDXTYPEUniqueNameThingId, uint16_t>)
-    __asm__("__ZN6CWorld22AddToPendingDeleteListE12tag_IDX_TYPEI24IDXTYPEUniqueNameThingIdtE");   // 0x1013b154
+    __asm__(TPW_ASM_NAME("_ZN6CWorld22AddToPendingDeleteListE12tag_IDX_TYPEI24IDXTYPEUniqueNameThingIdtE"));   // 0x1013b154
 // 0x1012c6b8, 556 bytes. The body remains untouched.
 void CTagSystem::Init() {
     for (int32_t type : {7, 12, 20, 24, 25, 19}) SubscribeThing(mBase, type);
