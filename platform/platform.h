@@ -54,6 +54,9 @@ struct Config {
     // (--background): a test run on the screen someone is working on. Clicking the window
     // focuses it as usual.
     bool background = false;
+    // --no-mouse: a test run sees only its scripted input, the pointer resting at the game's centre between clicks, so
+    // the real mouse of whoever works on the screen neither clicks in it nor scrolls the view from its edge.
+    bool noMouse = false;
     // Scripted input for a test run (--click X,Y@N): a left click at the game pixel (X, Y). The pointer moves there and
     // the button goes down on pass N of the run loop and comes up on pass N + 1 (passes count from 1, as the probe's
     // lines do); the pointer stays there until the real mouse moves.
