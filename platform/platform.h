@@ -73,6 +73,14 @@ struct Config {
         std::string text;
     };
     std::vector<ScriptedTyping> typing;
+    // Scripted held keys (--hold KEY@N/K): KEY goes down on pass N and up on pass N + K, so what the game reads while a
+    // key is held (the camera's arrows in its key table) sees it held.
+    struct ScriptedHold {
+        int32_t pass;
+        int32_t passes;
+        char key;
+    };
+    std::vector<ScriptedHold> holds;
     // A scripted drag with the left button (--drag X0,Y0-X1,Y1@N[/K]): the pointer goes to (X0, Y0) on pass N, the button
     // goes down there on pass N + 2, the pointer moves in K equal steps (default 8) to (X1, Y1) on passes N + 3 to N + 2 + K,
     // and the button comes up there on pass N + K + 4. Game pixels, as for clicks.
