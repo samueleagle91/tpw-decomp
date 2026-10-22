@@ -6,6 +6,7 @@
 
 #include "CMessageCentre.h"
 #include "ThingReceivers.h"
+#include <new>
 
 // The cell tag every derived constructor passes: map cell id 1 (cell x 0, y 0), built in the high half of r4 on the Mac.
 static inline tag_IDX_TYPE<IDXTYPEUniqueNameMapId, uint16_t> FirstCell() { return {1}; }

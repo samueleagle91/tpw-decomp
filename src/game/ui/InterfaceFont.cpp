@@ -49,7 +49,9 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#ifndef _WIN32
 #include <dlfcn.h>
+#endif
 #include <ios>
 #include <new>
 

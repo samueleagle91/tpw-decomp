@@ -52,7 +52,9 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#ifndef _WIN32
 #include <dlfcn.h>
+#endif
 #include <new>
 
 // Unit v51065: the online lists' small members, the park lists' GetList for the top ten and the by-park-id lists, the login callbacks,
@@ -193,10 +195,16 @@ void CFSOnlineSystemCityList::StoreReceivedList(const ccCityList* list) {
 namespace parklist_callee {
 // CFSOnlinePark's constructor (0x1017c0d8) is found by its symbol at run time: the test library does not compile its file.
 TPW_WEAK void NewPark(const ccParkInfo* info, CFSOnlineSystemParkList* list) {
+#ifdef _WIN32
+    // Windows has no dlsym, and its exe exports no symbols to look up; the differential tests do not run there, so the
+    // game's own constructor is called directly.
+    new (::operator new(0xc0)) CFSOnlinePark(info, list);
+#else
     typedef void (*Ctor)(void*, const ccParkInfo*, CFSOnlineSystemParkList*);
     static Ctor ctor = reinterpret_cast<Ctor>(dlsym(RTLD_DEFAULT, "_ZN13CFSOnlineParkC1EPK10ccParkInfoP23CFSOnlineSystemParkList"));
     void* park = ::operator new(0xc0);
     if (ctor != nullptr) ctor(park, info, list);
+#endif
 }
 }  // namespace parklist_callee
 

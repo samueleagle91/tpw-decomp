@@ -64,6 +64,7 @@ import json
 import os
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
 
@@ -127,7 +128,13 @@ IDENT = re.compile(r"[A-Za-z_]\w*")
 def load_libclang(compiler):
     """The libclang of the compiler's own toolchain, and the resource directory to parse with."""
     res = subprocess.run([compiler, "-print-resource-dir"], capture_output=True, text=True, check=True).stdout.strip()
-    lib = pathlib.Path(res).parent.parent / ("libclang.dylib" if sys.platform == "darwin" else "libclang.so")
+    if os.environ.get("TPW_LIBCLANG"):
+        # A toolchain without libclang (llvm-mingw ships only libclang-cpp) names one from elsewhere.
+        lib = pathlib.Path(os.environ["TPW_LIBCLANG"])
+    elif sys.platform == "win32":
+        lib = pathlib.Path(res).parent.parent.parent / "bin" / "libclang.dll"   # Windows keeps DLLs in bin/
+    else:
+        lib = pathlib.Path(res).parent.parent / ("libclang.dylib" if sys.platform == "darwin" else "libclang.so")
     if not lib.exists():
         found = ctypes.util.find_library("clang")
         if not found:
@@ -198,6 +205,15 @@ class Parser:
     def __init__(self, compiler):
         self.cl, self.resource_dir = load_libclang(compiler)
         self.index = self.cl.clang_createIndex(0, 0)
+        self.windows = []
+        if sys.platform == "win32":
+            # A MinGW driver takes its target from a config file beside it (llvm-mingw's x86_64-w64-windows-gnu.cfg)
+            # and its headers from the toolchain's root; libclang reads neither and would look for MSVC's.
+            target = subprocess.run([compiler, "-dumpmachine"], capture_output=True, text=True, check=True).stdout.strip()
+            root = pathlib.Path(shutil.which(compiler) or compiler).resolve().parent.parent
+            self.windows = [f"--target={target}", f"--sysroot={root}"]
+            if (root / "include" / "c++" / "v1").is_dir():
+                self.windows.append("-stdlib=libc++")   # llvm-mingw's mingw32-common.cfg; it has no libstdc++
 
     def text(self, cxstring):
         s = self.cl.clang_getCString(cxstring)
@@ -240,6 +256,8 @@ class Parser:
             sdk = subprocess.run(["xcrun", "--show-sdk-path"], capture_output=True, text=True).stdout.strip()
             if sdk:
                 extra += ["-isysroot", sdk]
+        if not any(f.startswith(("--target", "-target")) for f in flags):
+            extra += self.windows
         if contents is not None:
             extra.append("-ferror-limit=0")
         args = [a.encode() for a in extra + flags]
@@ -1210,7 +1228,8 @@ def cut(text, items, keep, src_name):
         out.append(removed_lines(text, x, y))
         pos = y
     out.append(text[pos:])
-    return f'#line 1 "{src_name}"\n' + "".join(out)
+    # A Windows path's backslashes would be escapes in the directive's string; the compiler takes '/' there too.
+    return f'#line 1 "{str(src_name).replace(chr(92), "/")}"\n' + "".join(out)
 
 
 def sha1(text):

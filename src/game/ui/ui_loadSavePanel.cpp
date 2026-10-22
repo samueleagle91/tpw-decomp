@@ -39,7 +39,9 @@
 #include "World.h"
 #include <cstddef>
 #include <cstdint>
+#ifndef _WIN32
 #include <dlfcn.h>
+#endif
 #include <new>
 
 // ui_mainpanel2.cpp (main app), unit v5183: LoadPanelMsg 0x101a2bdc, UI_HirePanelStateChange 0x101a2a14, SavePanelMsg 0x101a2df4.
@@ -184,9 +186,15 @@ char16_t gLoadSaveFormat[0x40] = {'%', 'l', 's', ' ', '%', '0', '2', 'd', ':', '
 // (looked up at run time).
 // Weak: the test library defines the recording fakes.
 __attribute__((weak)) void loadsave_callee::CursorPosCtor(void* mem) {
+#ifdef _WIN32
+    // Windows has no dlsym, and its exe exports no symbols to look up; the differential tests do not run there, so the
+    // constructor is called directly.
+    new (mem) InterfaceCursorPosTextObjectSprite(nullptr);
+#else
     using Ctor = void (*)(void*, void*);
     static Ctor ctor = reinterpret_cast<Ctor>(dlsym(RTLD_DEFAULT, "_ZN34InterfaceCursorPosTextObjectSpriteC1EPv"));
     if (ctor != nullptr) ctor(mem, nullptr);
+#endif
 }
 __attribute__((weak)) void loadsave_callee::FileTimeToLocal(const void* in, void* out) {
     // The Mac's glue converts to local time; no time zone is modelled here, so the stamp is copied.

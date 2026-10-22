@@ -60,7 +60,7 @@ TbError TbRegistryKey::OpenKey(const char* path) {
     const char* rest = nullptr;
     for (uint32_t i = 0; kRootNames[i][0] != 0; ++i) {
         uint32_t n = std::strlen(kRootNames[i]);
-        if (_strnicmp(kRootNames[i], path, n) == 0) {
+        if (NS_MacDoze::_strnicmp(kRootNames[i], path, n) == 0) {
             root = i | 0x80000000u;
             rest = path + n;
             break;
@@ -79,7 +79,7 @@ TbError TbRegistryKey::CreateKey(const char* path) {
     const char* rest = nullptr;
     for (uint32_t i = 0; kRootNames[i][0] != 0; ++i) {
         uint32_t n = std::strlen(kRootNames[i]);
-        if (_strnicmp(kRootNames[i], path, n) == 0) {
+        if (NS_MacDoze::_strnicmp(kRootNames[i], path, n) == 0) {
             root = i | 0x80000000u;
             rest = path + n;
             break;

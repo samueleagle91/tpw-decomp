@@ -315,7 +315,13 @@ void StereoConstruct(void* stereo) {
 // Lead 2026-10-20 (v51107): the three CSprocketsModule functions below are weak, and so are the class's vtable and typeinfo,
 // which the destructor (the key function) emits here: platform/sound_module.cpp holds the host versions the launcher links
 // (as v51053 did for SetSpeedOfSound and SetListenerVelocity), the unit test library takes these.
+#if defined(__APPLE__)
 asm(".weak_definition __ZTV16CSprocketsModule\n.weak_definition __ZTI16CSprocketsModule\n.weak_definition __ZTS16CSprocketsModule");
+#elif defined(__ELF__)
+asm(".weak _ZTV16CSprocketsModule\n.weak _ZTI16CSprocketsModule\n.weak _ZTS16CSprocketsModule");
+#endif
+// COFF (Windows) has no weak definition of an already-defined symbol: there the vtable and typeinfo stay strong, so a
+// launcher that brings its own CSprocketsModule destructor must drop this one (the slicer can) rather than rely on weakness.
 
 // 0x1002b374 (100): the Mac stores its vtable, runs the base destructor with the flag 0 and deletes when the delete flag is
 // above 0 (the C++ destructor leaves that to the caller). The NULL test is the caller's.

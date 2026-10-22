@@ -22,7 +22,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#ifndef _WIN32
 #include <dlfcn.h>
+#endif
 #include <new>
 #include <string>
 
